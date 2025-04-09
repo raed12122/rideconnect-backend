@@ -40,7 +40,7 @@ class RideRequestTestCase(unittest.TestCase):
             "pickup_lng": 46.6753,
             "dropoff_lat": 24.7275,
             "dropoff_lng": 46.6588,
-            "category_name": "spaceship",  # invalid category
+            "category_name": "spaceship",  #  invalid category
             "price_multiplier": 1.0,
             "surge_multiplier": 1.5,
             "surge_id": 2,
