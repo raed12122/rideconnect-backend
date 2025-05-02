@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "🚗 RideConnect API is running!"
+    return "RideConnect API is running!"
 
 @app.route('/ride-request', methods=['POST'])
 def ride_request():
@@ -20,17 +20,16 @@ def ride_request():
             "estimated_arrival": result["estimated_arrival"]
         })
     except Exception as e:
-        print("🚨 Error in /ride-request:", e)  # <--- ADD THIS
+        
         return jsonify({"error": str(e)}), 500
 
 @app.route('/ride-accept', methods=['POST'])
 def ride_accept():
     data = request.get_json()
-    result = accept_ride(data)
-
-    if "error" in result:
-        return jsonify(result[0]), result[1]  # error + status code
-
-    return jsonify(result)
+    try:
+        result = accept_ride(data)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 if __name__ == '__main__':
     app.run(debug=True)
