@@ -1,51 +1,36 @@
 from flask import Flask, request, jsonify
-from models import insert_ride_request, accept_ride_transaction
+from models import insert_ride, accept_ride
 
 app = Flask(__name__)
 
-# Home route
 @app.route('/')
 def home():
-    return " RideConnect API is running!"
+    return "🚗 RideConnect API is running!"
 
-# Ride Request Endpoint
 @app.route('/ride-request', methods=['POST'])
-def request_ride():
+def ride_request():
     data = request.get_json()
-
     try:
-        ride_id = insert_ride_request(data)
+        result = insert_ride(data)
         return jsonify({
-            "ride_id": ride_id,
+            "ride_id": result["ride_id"],
             "status": "requested",
-            "estimated_duration": data["estimated_duration"],
-            "estimated_arrival_time": data["estimated_arrival_time"],
-            "total_fare": data["total_fare"]
+            "estimated_duration": result["estimated_duration"],
+            "estimated_fare": result["estimated_fare"],
+            "estimated_arrival": result["estimated_arrival"]
         })
-
     except Exception as e:
+        print("🚨 Error in /ride-request:", e)  # <--- ADD THIS
         return jsonify({"error": str(e)}), 500
 
-# Ride Accept Endpoint
 @app.route('/ride-accept', methods=['POST'])
-def accept_ride():
+def ride_accept():
     data = request.get_json()
-    ride_id = data.get("ride_id")
-    driver_id = data.get("driver_id")
+    result = accept_ride(data)
 
-    result = accept_ride_transaction(ride_id, driver_id)
+    if "error" in result:
+        return jsonify(result[0]), result[1]  # error + status code
 
-    if result == "not_found":
-        return jsonify({"error": "Ride not found"}), 404
-    elif result == "unavailable":
-        return jsonify({"error": "Ride already accepted or unavailable"}), 409
-
-    return jsonify({
-        "ride_id": ride_id,
-        "driver_id": driver_id,
-        "status": "accepted"
-    })
-
-# Run the app
+    return jsonify(result)
 if __name__ == '__main__':
     app.run(debug=True)
